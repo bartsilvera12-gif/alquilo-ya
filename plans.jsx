@@ -2,6 +2,7 @@
 
 function PlansPage({ onNav }) {
   const [audience, setAudience] = React.useState('owner');
+  const [verifyOpen, setVerifyOpen] = React.useState(false);
   const filtered = PLANS.filter(p => p.tier.includes(audience === 'owner' ? 'owner' : 'agent'));
   return (
     <div className="fade-in container" style={{ padding: '48px 32px' }}>
@@ -16,8 +17,8 @@ function PlansPage({ onNav }) {
       </div>
       <div className="row" style={{ justifyContent: 'center', marginTop: 28 }}>
         <Segment value={audience} onChange={setAudience} items={[
-          { id: 'owner', label: 'Propietarios' },
-          { id: 'agent', label: 'Agentes inmobiliarios' },
+          { id: 'owner', label: 'Dueños directos' },
+          { id: 'agent', label: 'Agentes e inmobiliarias' },
         ]}/>
       </div>
 
@@ -33,7 +34,7 @@ function PlansPage({ onNav }) {
             Pedí la verificación de tu inmueble: nuestro equipo confirma documentación, ubicación real y fotos. Obtené el badge azul, prioridad en resultados y mayor confianza para los interesados.
           </p>
           <div className="row gap-12" style={{ marginTop: 18 }}>
-            <button className="btn btn-blue">Solicitar verificación <I.check s={14}/></button>
+            <button className="btn btn-blue" onClick={() => setVerifyOpen(true)}>Solicitar verificación <I.check s={14}/></button>
             <span className="muted xs">Desde Gs. 45.000 por inmueble</span>
           </div>
         </div>
@@ -55,8 +56,10 @@ function PlansPage({ onNav }) {
         </div>
       </div>
 
-      <CompareTable audience={audience}/>
+      <ImpulseSection/>
+      <CompareTable/>
       <PlansFaq/>
+      {verifyOpen && <VerificationModal onClose={() => setVerifyOpen(false)}/>}
     </div>
   );
 }
@@ -83,16 +86,28 @@ function PlanCard({ plan }) {
         </span>
       </div>
       <div style={{ fontFamily: 'Montserrat', fontWeight: 800, fontSize: 26, marginTop: 6 }}>{plan.name}</div>
-      <div style={{ marginTop: 16, display: 'flex', alignItems: 'baseline', gap: 6 }}>
-        {plan.price === 0 ? (
+      <div style={{ marginTop: 16, display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+        {plan.billing === 'gratis' ? (
           <span style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: 44, color: 'var(--blue)' }}>Gs. 0</span>
         ) : (
           <>
-            <span style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: 44, color: 'var(--blue)' }}>{formatGs(plan.price).replace('Gs. ','Gs. ')}</span>
-            <span className="muted" style={{ fontSize: 14 }}>/ mes</span>
+            <span style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: 44, color: 'var(--blue)' }}>{formatGs(plan.price)}</span>
+            <span className="muted" style={{ fontSize: 14 }}>
+              {plan.billing === 'mensual' ? '/ mes' : 'pago único'}
+            </span>
           </>
         )}
       </div>
+      {plan.billing === 'unico' && (
+        <div style={{ marginTop: 4 }}>
+          <span className="badge badge-soft-yellow" style={{ fontSize: 11 }}>Sin renovación automática</span>
+        </div>
+      )}
+      {plan.billing === 'mensual' && (
+        <div style={{ marginTop: 4 }}>
+          <span className="badge badge-soft" style={{ fontSize: 11 }}>Suscripción recurrente</span>
+        </div>
+      )}
       <button className={"btn " + (highlight ? 'btn-primary' : 'btn-blue')} style={{ width: '100%', justifyContent: 'center', marginTop: 18 }}>
         {plan.cta}
       </button>
@@ -106,39 +121,134 @@ function PlanCard({ plan }) {
             <span style={{ fontSize: 14, color: 'var(--ink-2)' }}>{b}</span>
           </div>
         ))}
+        {plan.excluded && plan.excluded.length > 0 && plan.excluded.map(b => (
+          <div key={b} className="row gap-10" style={{ alignItems: 'flex-start', opacity: .55 }}>
+            <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--bg-3)', color: 'var(--ink-4)', display: 'grid', placeItems: 'center', flexShrink: 0, marginTop: 1, fontSize: 12, fontWeight: 700 }}>
+              ×
+            </span>
+            <span style={{ fontSize: 13.5, color: 'var(--ink-3)', textDecoration: 'line-through' }}>{b}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function CompareTable({ audience }) {
-  const rows = [
-    ['Propiedades activas', '1', '5 / ilimitado'],
-    ['Fotos por inmueble', '5', '25'],
-    ['Video / Tour 360°', '—', 'Sí'],
-    ['Reporte de visualizaciones', 'Básico', 'Completo'],
-    ['Posición destacada', '—', 'Hasta 7 días'],
-    ['Creador visual de flyer + QR', '—', 'Sí'],
-    ['Integración WhatsApp Business', '—', audience === 'agent' ? 'Sí' : '—'],
-    ['Identidad propia con logo', '—', audience === 'agent' ? 'Sí' : '—'],
-    ['Soporte', 'Email', 'Email + WhatsApp prioritario'],
+function CompareTable() {
+  const cols = [
+    { key: 'gratuito', name: 'Gratuito', subtitle: 'Dueño Directo' },
+    { key: 'basico',   name: 'Básico',   subtitle: 'Dueño · Pago Único' },
+    { key: 'starter',  name: 'Starter',  subtitle: 'Agente Independiente' },
+    { key: 'premium',  name: 'Premium',  subtitle: 'Inmobiliaria / Top Pro' },
   ];
+  const rows = [
+    ['Precio mensual',                'Gratis',         'Gs. 49.000',            'Gs. 149.000',                'Gs. 399.000'],
+    ['Vigencia del anuncio / plan',   '30 días',        '30 días (fijo)',        'Recurrente',                 'Recurrente'],
+    ['Capacidad de propiedades activas', '1',           '1',                     '15',                         '50'],
+    ['Fotos permitidas por inmueble', '5',              '5',                     '10',                         '15'],
+    ['Contacto directo a WhatsApp',   'Sí',             'Sí',                    'Sí',                         'Sí'],
+    ['Prioridad en búsqueda',         '—',              'Máxima prioridad',      'Sí',                         'Sí'],
+    ['Impulsos gratis por mes',       '—',              '—',                     '3',                          '10'],
+    ['Comprar impulsos extra',        '—',              '—',                     'Sí',                         'Sí'],
+    ['Destacado (primer plano)',      '—',              '—',                     'Sí',                         'Sí'],
+    ['Video Tour 360° + Link Redes',  '—',              '—',                     'Sí',                         'Sí'],
+    ['Herramientas de marketing (Flyer + QR)', '—',     '—',                     'Sí',                         'Sí'],
+    ['Identidad propia en la plataforma', '—',          '—',                     '—',                          'Sí'],
+    ['CRM integrado con WhatsApp',    '—',              '—',                     '—',                          'Sí'],
+    ['Soporte técnico especializado', 'Básico',         'Básico',                'Sí',                         'Prioritario'],
+  ];
+  const cellStyle = (v) => ({
+    fontSize: 13.5,
+    color: v === '—' ? 'var(--ink-4)' : (v === 'Sí' ? 'var(--green)' : 'var(--ink-2)'),
+    fontWeight: v === 'Sí' ? 700 : 500,
+    textAlign: 'center',
+  });
   return (
     <div style={{ marginTop: 56 }}>
       <SectionHead eyebrow="Comparativa" title="Todo lo que incluye cada plan" />
       <div className="card" style={{ marginTop: 24, padding: 0, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', background: 'var(--bg-2)', padding: '16px 22px', fontWeight: 700, fontSize: 13, color: 'var(--ink-2)' }}>
-          <div>Característica</div>
-          <div>Gratis</div>
-          <div>Premium</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr repeat(4, 1fr)', background: 'var(--blue)', color: '#fff', padding: '16px 18px', fontWeight: 700, fontSize: 13 }}>
+          <div>Características / Beneficios</div>
+          {cols.map(c => (
+            <div key={c.key} style={{ textAlign: 'center', lineHeight: 1.25 }}>
+              <div style={{ fontWeight: 800 }}>Plan {c.name}</div>
+              <div style={{ fontSize: 11, opacity: .85, fontWeight: 500 }}>({c.subtitle})</div>
+            </div>
+          ))}
         </div>
-        {rows.map(([k, a, b], i) => (
-          <div key={k} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', padding: '14px 22px', fontSize: 14, borderTop: '1px solid var(--line-2)', background: i % 2 ? 'var(--bg-2)' : '#fff' }}>
-            <div style={{ color: 'var(--ink-2)' }}>{k}</div>
-            <div className="muted">{a}</div>
-            <div style={{ fontWeight: 600 }}>{b}</div>
+        {rows.map(([label, a, b, c, d], i) => (
+          <div key={label} style={{ display: 'grid', gridTemplateColumns: '1.4fr repeat(4, 1fr)', padding: '12px 18px', fontSize: 14, borderTop: '1px solid var(--line-2)', background: i % 2 ? 'var(--bg-2)' : '#fff', alignItems: 'center' }}>
+            <div style={{ color: 'var(--ink-2)', fontWeight: 500 }}>{label}</div>
+            <div style={cellStyle(a)}>{a}</div>
+            <div style={cellStyle(b)}>{b}</div>
+            <div style={cellStyle(c)}>{c}</div>
+            <div style={cellStyle(d)}>{d}</div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function ImpulseSection() {
+  return (
+    <div style={{ marginTop: 56 }}>
+      <SectionHead eyebrow="Impulsos" title="Destacá más propiedades cuando lo necesites" />
+      <div className="card" style={{ marginTop: 24, padding: 32, background: 'linear-gradient(135deg, #fff7e3 0%, #fff 60%)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'center' }}>
+          <div>
+            <div className="row gap-8">
+              <span className="badge badge-featured"><I.bolt s={11}/> Cómo funcionan</span>
+            </div>
+            <h3 style={{ fontSize: 22, marginTop: 12 }}>1 impulso = 7 días destacado en home y catálogo</h3>
+            <p className="muted" style={{ marginTop: 10, fontSize: 14.5, lineHeight: 1.6 }}>
+              El plan <strong>Starter</strong> incluye <strong>3 impulsos gratis</strong> por mes y <strong>Premium</strong> incluye <strong>10</strong>.
+              Si necesitás destacar más propiedades, comprá impulsos extra y usalos cuando quieras — sin vencimiento.
+            </p>
+            <div className="col gap-8" style={{ marginTop: 16 }}>
+              {[
+                'Aparece en el primer plano del catálogo y home',
+                'Badge "Destacada" amarillo en la card',
+                'Hasta 3x más visualizaciones promedio',
+                'Sin vencimiento: los impulsos no caducan',
+              ].map(t => (
+                <div key={t} className="row gap-10">
+                  <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--yellow)', color: 'var(--ink)', display: 'grid', placeItems: 'center' }}>
+                    <I.check s={11}/>
+                  </span>
+                  <span style={{ fontSize: 13.5, color: 'var(--ink-2)' }}>{t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="col gap-12">
+            {IMPULSE_PACKS.map(pack => (
+              <div key={pack.id} className="card" style={{
+                padding: 16,
+                border: pack.popular ? '2px solid var(--yellow)' : (pack.best ? '2px solid var(--blue)' : '1px solid var(--line)'),
+                position: 'relative'
+              }}>
+                {pack.popular && <span style={{ position: 'absolute', top: -10, right: 16, background: 'var(--yellow)', color: 'var(--ink)', padding: '2px 10px', borderRadius: 999, fontSize: 10.5, fontWeight: 700 }}>MÁS ELEGIDO</span>}
+                {pack.best && <span style={{ position: 'absolute', top: -10, right: 16, background: 'var(--blue)', color: '#fff', padding: '2px 10px', borderRadius: 999, fontSize: 10.5, fontWeight: 700 }}>MEJOR PRECIO</span>}
+                <div className="row between" style={{ alignItems: 'center' }}>
+                  <div>
+                    <div className="row gap-8" style={{ alignItems: 'baseline' }}>
+                      <span style={{ fontFamily: 'Montserrat', fontWeight: 800, fontSize: 22 }}>
+                        {pack.qty} <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-3)' }}>impulso{pack.qty > 1 ? 's' : ''}</span>
+                      </span>
+                      {pack.save && <span className="badge" style={{ background: 'var(--green)', color: '#fff', fontSize: 10 }}>−{pack.save}</span>}
+                    </div>
+                    <div className="muted xs" style={{ marginTop: 2 }}>Gs. {pack.unit.toLocaleString('es-PY')} c/u</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontFamily: 'Montserrat', fontWeight: 800, fontSize: 18, color: 'var(--blue)' }}>{formatGs(pack.price)}</div>
+                    <button className="btn btn-blue btn-sm" style={{ marginTop: 4 }}>Comprar</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

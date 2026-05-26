@@ -1,18 +1,25 @@
 // Catálogo / Resultados de búsqueda
 
 function CatalogPage({ onProperty }) {
-  const [tipo, setTipo] = React.useState('all');
+  const pending = (typeof window !== 'undefined' && window.__pendingSearch) || null;
+  const [tipo, setTipo] = React.useState(pending?.tipo || 'all');
   const [sort, setSort] = React.useState('recent');
   const [view, setView] = React.useState('grid');
   const [filters, setFilters] = React.useState({
-    depto: 'Central', ciudad: 'Asunción', barrio: 'Todos',
-    min: 1500000, max: 8000000,
+    depto: pending?.depto || 'Central',
+    ciudad: pending?.ciudad || 'Asunción',
+    barrio: pending?.barrio || 'Todos',
+    min: pending?.priceMin ?? 1500000, max: pending?.priceMax ?? 8000000,
+    areaMin: pending?.areaMin ?? 0, areaMax: pending?.areaMax ?? 500,
     beds: 0, baths: 0,
     amoblado: false, mascotas: false, verified: false, temporal: false,
   });
+  React.useEffect(() => { if (window.__pendingSearch) delete window.__pendingSearch; }, []);
   const filtered = PROPERTIES.filter(p =>
     (tipo === 'all' || p.tipo === tipo) &&
     p.price >= filters.min && p.price <= filters.max &&
+    (!filters.areaMin || p.m2 >= filters.areaMin) &&
+    (!filters.areaMax || p.m2 <= filters.areaMax) &&
     (filters.beds === 0 || p.beds >= filters.beds) &&
     (filters.baths === 0 || p.baths >= filters.baths) &&
     (!filters.amoblado || p.amoblado) &&
@@ -35,12 +42,12 @@ function CatalogPage({ onProperty }) {
           <div className="row between" style={{ marginBottom: 16 }}>
             <div className="row gap-12">
               <span style={{ fontSize: 14, color: 'var(--ink-3)' }}>Ordenar por:</span>
-              <select className="select" value={sort} onChange={e => setSort(e.target.value)} style={{ width: 'auto', padding: '8px 12px' }}>
-                <option value="recent">Más recientes</option>
-                <option value="priceAsc">Menor precio</option>
-                <option value="priceDesc">Mayor precio</option>
-                <option value="featured">Destacados</option>
-              </select>
+              <PrettySelect value={sort} onChange={setSort} style={{ width: 200 }} options={[
+                { value: 'recent', label: 'Más recientes' },
+                { value: 'priceAsc', label: 'Menor precio' },
+                { value: 'priceDesc', label: 'Mayor precio' },
+                { value: 'featured', label: 'Destacados' },
+              ]}/>
             </div>
             <div className="row gap-8">
               <button className={"btn btn-sm " + (view === 'grid' ? 'btn-blue' : 'btn-outline')} onClick={() => setView('grid')}><I.grid s={14}/> Grilla</button>
@@ -116,31 +123,38 @@ function FilterPanel({ filters, setFilters }) {
           <button onClick={() => setFilters({ depto: 'Central', ciudad: 'Asunción', barrio: 'Todos', min: 1500000, max: 8000000, beds: 0, baths: 0, amoblado: false, mascotas: false, verified: false, temporal: false })} style={{ background: 'none', border: 'none', color: 'var(--blue)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Limpiar</button>
         </div>
         <FilterGroup title="Ubicación">
-          <div className="field" style={{ marginBottom: 10 }}>
-            <select className="select" value={filters.depto} onChange={e => upd('depto', e.target.value)}>
-              {DEPARTAMENTOS.map(d => <option key={d}>{d}</option>)}
-            </select>
+          <div style={{ marginBottom: 10 }}>
+            <PrettySelect value={filters.depto} onChange={v => upd('depto', v)} options={DEPARTAMENTOS}/>
           </div>
-          <div className="field" style={{ marginBottom: 10 }}>
-            <select className="select" value={filters.ciudad} onChange={e => upd('ciudad', e.target.value)}>
-              {(CIUDADES[filters.depto] || []).map(c => <option key={c}>{c}</option>)}
-            </select>
+          <div style={{ marginBottom: 10 }}>
+            <PrettySelect value={filters.ciudad} onChange={v => upd('ciudad', v)} options={CIUDADES[filters.depto] || []}/>
           </div>
-          <select className="select" value={filters.barrio} onChange={e => upd('barrio', e.target.value)}>
-            <option>Todos los barrios</option>
-            {BARRIOS.map(b => <option key={b}>{b}</option>)}
-          </select>
+          <PrettySelect value={filters.barrio} onChange={v => upd('barrio', v)} options={['Todos los barrios', ...BARRIOS]}/>
         </FilterGroup>
 
         <FilterGroup title="Precio (Gs.)">
           <div className="row gap-8" style={{ marginBottom: 12 }}>
-            <input className="input" type="number" value={filters.min} onChange={e => upd('min', +e.target.value)} style={{ padding: '8px 10px', fontSize: 13 }}/>
+            <input className="input" type="number" value={filters.min}
+              onChange={e => {
+                const v = Math.max(0, +e.target.value || 0);
+                setFilters(f => ({ ...f, min: v, max: Math.max(v, f.max) }));
+              }}
+              style={{ padding: '8px 10px', fontSize: 13 }}/>
             <span style={{ color: 'var(--ink-4)' }}>—</span>
-            <input className="input" type="number" value={filters.max} onChange={e => upd('max', +e.target.value)} style={{ padding: '8px 10px', fontSize: 13 }}/>
+            <input className="input" type="number" value={filters.max}
+              onChange={e => {
+                const v = Math.max(0, +e.target.value || 0);
+                setFilters(f => ({ ...f, max: v, min: Math.min(v, f.min) }));
+              }}
+              style={{ padding: '8px 10px', fontSize: 13 }}/>
           </div>
-          <RangeBar min={filters.min} max={filters.max} />
-          <div className="row between" style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 6, fontFamily: 'JetBrains Mono' }}>
-            <span>Gs. 0</span><span>Gs. 12.000.000</span>
+          <DraggableRange
+            min={0} max={20000000} step={100000}
+            valueMin={filters.min} valueMax={filters.max}
+            onChange={(a, b) => setFilters(f => ({ ...f, min: a, max: b }))}
+          />
+          <div className="row between" style={{ fontSize: 12, color: 'var(--ink-4)', marginTop: 8 }}>
+            <span>Gs. 0</span><span>Gs. 20.000.000</span>
           </div>
         </FilterGroup>
 
@@ -175,15 +189,67 @@ function FilterGroup({ title, children }) {
     </div>
   );
 }
-function RangeBar({ min, max }) {
-  const total = 12000000;
-  const left = (min / total) * 100;
-  const right = ((total - max) / total) * 100;
+function DraggableRange({ min, max, step = 1, valueMin, valueMax, onChange }) {
+  const track = React.useRef(null);
+  const [dragging, setDragging] = React.useState(null);
+  const clamp = (v) => Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100));
+  const pctMin = clamp(valueMin);
+  const pctMax = clamp(valueMax);
+
+  const valueFromEvent = (clientX) => {
+    if (!track.current) return min;
+    const r = track.current.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    let v = min + pct * (max - min);
+    v = Math.round(v / step) * step;
+    return Math.max(min, Math.min(max, v));
+  };
+
+  React.useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e) => {
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      const v = valueFromEvent(x);
+      if (dragging === 'min') onChange(Math.min(v, valueMax - step), valueMax);
+      else onChange(valueMin, Math.max(v, valueMin + step));
+    };
+    const onUp = () => setDragging(null);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchend', onUp);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchend', onUp);
+    };
+  }, [dragging, valueMin, valueMax]);
+
   return (
-    <div style={{ position: 'relative', height: 6, background: 'var(--bg-3)', borderRadius: 3 }}>
-      <div style={{ position: 'absolute', left: left + '%', right: right + '%', top: 0, bottom: 0, background: 'var(--blue)', borderRadius: 3 }}/>
-      <div style={{ position: 'absolute', left: 'calc(' + left + '% - 7px)', top: -5, width: 16, height: 16, background: '#fff', borderRadius: '50%', border: '3px solid var(--blue)', boxShadow: 'var(--shadow-sm)' }}/>
-      <div style={{ position: 'absolute', left: 'calc(' + (100-right) + '% - 7px)', top: -5, width: 16, height: 16, background: '#fff', borderRadius: '50%', border: '3px solid var(--blue)', boxShadow: 'var(--shadow-sm)' }}/>
+    <div style={{ padding: '6px 8px 2px' }}>
+      <div ref={track}
+        onClick={(e) => {
+          const v = valueFromEvent(e.clientX);
+          const distMin = Math.abs(v - valueMin), distMax = Math.abs(v - valueMax);
+          if (distMin < distMax) onChange(Math.min(v, valueMax - step), valueMax);
+          else onChange(valueMin, Math.max(v, valueMin + step));
+        }}
+        style={{ position: 'relative', height: 6, background: 'var(--bg-3)', borderRadius: 999, cursor: 'pointer' }}>
+        <div style={{ position: 'absolute', left: pctMin + '%', right: (100 - pctMax) + '%', top: 0, bottom: 0, background: 'var(--blue)', borderRadius: 999 }}/>
+        {[{ pct: pctMin, who: 'min' }, { pct: pctMax, who: 'max' }].map(h => (
+          <div key={h.who}
+            onMouseDown={(e) => { e.stopPropagation(); setDragging(h.who); }}
+            onTouchStart={(e) => { e.stopPropagation(); setDragging(h.who); }}
+            style={{
+              position: 'absolute', left: `calc(${h.pct}% - 9px)`, top: -7,
+              width: 18, height: 18, borderRadius: '50%',
+              background: '#fff', border: '3px solid var(--blue)',
+              boxShadow: '0 2px 6px rgba(11,22,34,.18)',
+              cursor: 'grab', touchAction: 'none'
+            }}/>
+        ))}
+      </div>
     </div>
   );
 }

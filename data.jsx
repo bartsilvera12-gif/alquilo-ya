@@ -1,22 +1,114 @@
 // Mock data — properties, departamentos, ciudades, etc.
 
-const DEPARTAMENTOS = ['Central', 'Capital', 'Alto Paraná', 'Itapúa', 'Cordillera', 'Caaguazú', 'San Pedro'];
+const DEPARTAMENTOS = [
+  'Central', 'Alto Paraná', 'Itapúa', 'Cordillera', 'Caaguazú', 'San Pedro',
+  'Paraguarí', 'Guairá', 'Caazapá', 'Misiones', 'Ñeembucú', 'Concepción', 'Amambay', 'Canindeyú',
+  'Presidente Hayes', 'Boquerón', 'Alto Paraguay',
+];
 const CIUDADES = {
-  'Central': ['Asunción', 'San Lorenzo', 'Luque', 'Lambaré', 'Fernando de la Mora', 'Capiatá'],
-  'Capital': ['Asunción'],
-  'Alto Paraná': ['Ciudad del Este', 'Hernandarias', 'Presidente Franco'],
-  'Itapúa': ['Encarnación', 'Cambyretá'],
-  'Cordillera': ['Caacupé', 'Piribebuy'],
-  'Caaguazú': ['Coronel Oviedo', 'Caaguazú'],
-  'San Pedro': ['San Estanislao', 'San Pedro de Ycuamandyyú'],
+  'Central': ['Asunción', 'San Lorenzo', 'Luque', 'Lambaré', 'Fernando de la Mora', 'Capiatá', 'Ñemby', 'Mariano Roque Alonso', 'Villa Elisa', 'Limpio', 'San Antonio', 'Areguá', 'Itauguá', 'Itá', 'Ypané', 'Guarambaré'],
+  'Alto Paraná': ['Ciudad del Este', 'Hernandarias', 'Presidente Franco', 'Minga Guazú', 'Santa Rita'],
+  'Itapúa': ['Encarnación', 'Cambyretá', 'Hohenau', 'Obligado'],
+  'Cordillera': ['Caacupé', 'Piribebuy', 'Tobatí', 'Eusebio Ayala', 'Atyrá'],
+  'Caaguazú': ['Coronel Oviedo', 'Caaguazú', 'Repatriación', 'Yhú', 'San José de los Arroyos'],
+  'San Pedro': ['San Estanislao', 'San Pedro de Ycuamandyyú', 'Choré', 'General Resquín'],
+  'Paraguarí': ['Paraguarí', 'Carapeguá', 'Yaguarón', 'Quiindy'],
+  'Guairá': ['Villarrica', 'Independencia', 'Mbocayaty'],
+  'Caazapá': ['Caazapá', 'San Juan Nepomuceno', 'Yuty'],
+  'Misiones': ['San Juan Bautista', 'Santa Rosa', 'Ayolas', 'San Ignacio'],
+  'Ñeembucú': ['Pilar', 'Alberdi', 'Tacuaras'],
+  'Concepción': ['Concepción', 'Horqueta', 'Yby Yaú'],
+  'Amambay': ['Pedro Juan Caballero', 'Bella Vista Norte', 'Capitán Bado'],
+  'Canindeyú': ['Salto del Guairá', 'Curuguaty', 'Katueté'],
+  'Presidente Hayes': ['Villa Hayes', 'Benjamín Aceval', 'Nanawa'],
+  'Boquerón': ['Filadelfia', 'Loma Plata', 'Mariscal Estigarribia'],
+  'Alto Paraguay': ['Fuerte Olimpo', 'Bahía Negra', 'Puerto Casado'],
 };
 const BARRIOS = ['Villa Morra', 'Carmelitas', 'Las Lomas', 'Recoleta', 'Ycuá Satí', 'Jara', 'Mburucuyá', 'Trinidad', 'Centro', 'Manorá'];
+
+// Barrios por ciudad — al elegir una ciudad se filtran los barrios de esa zona
+const BARRIOS_BY_CIUDAD = {
+  'Asunción': ['Villa Morra', 'Carmelitas', 'Las Mercedes', 'Recoleta', 'Ycuá Satí', 'Jara', 'Mburucuyá', 'Trinidad', 'Centro / Microcentro', 'Manorá', 'Sajonia', 'Pinozá', 'San Roque', 'Mariscal López', 'Las Lomas', 'Itay Cará', 'Loma Pytá', 'Tembetary'],
+  'San Lorenzo': ['Centro', 'Villa Constitución', 'San Roque', 'Reducto', 'Yacht', 'Laurelty', 'Santa Rosa', 'Tarumá'],
+  'Luque': ['Centro', 'San Isidro', 'Aviadores del Chaco', 'Areguá Hapy', 'Mora Cué', 'Loma Merlo', 'San Pedro', 'Cañadita'],
+  'Lambaré': ['Centro', 'Yukyty', 'Roberto L. Pettit', 'Cerro Corá', 'Mbocayaty', 'Santa Ana', 'Las Mercedes', 'Ñu Guazú'],
+  'Fernando de la Mora': ['Centro', 'Zona Norte', 'Zona Sur', 'Pitiantuta', 'Yguá'],
+  'Capiatá': ['Centro', 'Km 17', 'Km 19', 'Km 20', 'Km 22', 'Sol Naciente', 'Itá Yvate', 'Cristo Rey', 'Itapuamí', 'Yvyraty', '21 de Setiembre'],
+  'Ñemby': ['Centro', 'Salado', 'Cerro Cora', 'Loma Merlo', 'Mbocayaty', 'Pa\'i Ñu'],
+  'Mariano Roque Alonso': ['Centro', 'Surubi-i', 'Tarumandymí', 'Loma Tarumá', 'Itá Enramada'],
+  'Villa Elisa': ['Centro', 'San Miguel', 'Pirayú', 'San Isidro', 'Yvoty'],
+  'Limpio': ['Centro', 'Sarambí', 'Caraguatá', 'San Antonio', 'Tacumbú'],
+  'San Antonio': ['Centro', 'Itá Enramada', 'Tres Bocas'],
+  'Areguá': ['Centro', 'Yukyty', 'Costanera', 'Estanzuela', 'Pacu Cuá'],
+  'Itauguá': ['Centro', 'Itauguá Guazú', 'San Blas', 'Loma'],
+  'Itá': ['Centro', 'Cabañas', 'San Cosme'],
+  'Ypané': ['Centro', 'Costa Pucú', 'Tarumandy'],
+  'Guarambaré': ['Centro', 'Pirayú', 'San José'],
+  'Ciudad del Este': ['Centro', 'Km 7', 'Boquerón', 'Don Bosco', 'Área 1', 'Área 2', 'Área 3', 'Pablo Rojas', 'San Blas', 'Remansito'],
+  'Hernandarias': ['Centro', 'Km 8', 'Km 10', 'San Roque', 'Acaray'],
+  'Presidente Franco': ['Centro', 'Km 4', 'Acaray', 'Naranjal'],
+  'Minga Guazú': ['Centro', 'Km 16', 'Km 20'],
+  'Santa Rita': ['Centro', 'Naranjito', 'San Cristóbal'],
+  'Encarnación': ['Centro', 'San Roque', 'Quiteria', 'Villa María', 'Costanera', 'Carmen del Paraná', 'Mboi Caé', 'San Pedro'],
+  'Cambyretá': ['Centro', 'Tres Bocas', 'San Pablo'],
+  'Hohenau': ['Centro', 'Línea 1', 'Línea 2'],
+  'Obligado': ['Centro', 'Colonia'],
+  'Caacupé': ['Centro', 'Yhaguy', 'Tobatí Mí', 'San Roque'],
+  'Piribebuy': ['Centro', 'Loma', 'Costa'],
+  'Tobatí': ['Centro', 'Costa', 'San José'],
+  'Eusebio Ayala': ['Centro', 'Capilla del Monte'],
+  'Atyrá': ['Centro', 'Tobatiry', 'Costa Pucú'],
+  'Coronel Oviedo': ['Centro', 'Don Bosco', 'San Blas', 'Tres Bocas'],
+  'Caaguazú': ['Centro', 'Loma Merlo', 'Tres Bocas'],
+  'Repatriación': ['Centro', 'Colonia'],
+  'Yhú': ['Centro', 'Línea Yhú'],
+  'San José de los Arroyos': ['Centro', 'San Antonio'],
+  'San Estanislao': ['Centro', 'Tacuara', 'Calle 8'],
+  'San Pedro de Ycuamandyyú': ['Centro', 'Costa Norte'],
+  'Choré': ['Centro', 'Línea 3', 'Línea 5'],
+  'General Resquín': ['Centro', 'Costa'],
+  'Paraguarí': ['Centro', 'Cerro Yaguarón', 'San Roque'],
+  'Carapeguá': ['Centro', 'San Roque', 'Costa'],
+  'Yaguarón': ['Centro', 'Cerro Yaguarón'],
+  'Quiindy': ['Centro', 'Acahay'],
+  'Villarrica': ['Centro', 'Norte', 'Sur', 'San Roque', 'San Miguel'],
+  'Independencia': ['Centro', 'Colonia'],
+  'Mbocayaty': ['Centro', 'Costa'],
+  'Caazapá': ['Centro', 'San Roque'],
+  'San Juan Nepomuceno': ['Centro', 'Costa'],
+  'Yuty': ['Centro', 'Costa Yuty'],
+  'San Juan Bautista': ['Centro', 'San Miguel'],
+  'Santa Rosa': ['Centro', 'San Ignacio'],
+  'Ayolas': ['Centro', 'Loma'],
+  'San Ignacio': ['Centro', 'San Patricio'],
+  'Pilar': ['Centro', 'Costanera', 'Cué Pyahu'],
+  'Alberdi': ['Centro', 'San Antonio'],
+  'Tacuaras': ['Centro'],
+  'Concepción': ['Centro', 'Norte', 'Sur', 'Tres Bocas', 'San Antonio'],
+  'Horqueta': ['Centro', 'Costa'],
+  'Yby Yaú': ['Centro', 'Costa'],
+  'Pedro Juan Caballero': ['Centro', 'Cerro Corá', 'San Blas', 'San Miguel', 'Loma Merlo'],
+  'Bella Vista Norte': ['Centro', 'Frontera'],
+  'Capitán Bado': ['Centro', 'Costa'],
+  'Salto del Guairá': ['Centro', 'San José', 'Acaray'],
+  'Curuguaty': ['Centro', 'Costa', 'Línea 1'],
+  'Katueté': ['Centro', 'Colonia'],
+  'Villa Hayes': ['Centro', 'Tte. Irala', 'San Antonio'],
+  'Benjamín Aceval': ['Centro', 'Costa'],
+  'Nanawa': ['Centro', 'Frontera'],
+  'Filadelfia': ['Centro', 'Loma Plata', 'Manantial', 'Avenida Hindenburg', 'Colonia Fernheim'],
+  'Loma Plata': ['Centro', 'Norte', 'Sur'],
+  'Mariscal Estigarribia': ['Centro', 'Cruce Pioneros'],
+  'Fuerte Olimpo': ['Centro', 'Costa'],
+  'Bahía Negra': ['Centro'],
+  'Puerto Casado': ['Centro'],
+};
 
 const TIPOS = [
   { id: 'depto', label: 'Departamento', icon: 'apt' },
   { id: 'casa', label: 'Casa independiente', icon: 'house' },
   { id: 'salon', label: 'Salón comercial', icon: 'shop' },
-  { id: 'temporal', label: 'Alquiler temporal', icon: 'beach' },
+  { id: 'temporal', label: 'Alquiler temporal', icon: 'cal' },
 ];
 
 // Unsplash photo IDs — modern real estate photos
@@ -107,19 +199,121 @@ const PROPERTIES = TITLES.map((title, i) => {
 });
 
 const PLANS = [
-  { tier: 'free-owner', target: 'Propietario', name: 'Gratis', price: 0, badge: null,
-    bullets: ['1 propiedad activa', 'Hasta 5 fotos por inmueble', 'Publicación por 30 días', 'Contacto directo por WhatsApp', 'Estadísticas básicas'],
+  { tier: 'gratuito-owner', target: 'Dueño Directo', name: 'Gratuito', price: 0, billing: 'gratis', badge: null,
+    bullets: [
+      '1 propiedad activa',
+      'Hasta 5 fotos por inmueble',
+      'Vigencia 30 días',
+      'Contacto directo por WhatsApp',
+      'Soporte básico',
+    ],
+    excluded: ['Prioridad en búsqueda', 'Destacado (primer plano)', 'Video tour 360° + link a redes', 'Herramientas de marketing', 'Identidad propia', 'CRM integrado'],
     cta: 'Empezar gratis' },
-  { tier: 'free-agent', target: 'Agente', name: 'Gratis Agente', price: 0, badge: null,
-    bullets: ['Hasta 5 propiedades', 'Hasta 8 fotos por inmueble', 'Publicación por 30 días', 'Perfil con nombre comercial', 'Soporte por email'],
-    cta: 'Empezar gratis' },
-  { tier: 'premium-owner', target: 'Propietario', name: 'Premium', price: 89000, badge: 'Más elegido',
-    bullets: ['Hasta 5 propiedades', 'Hasta 25 fotos + video / tour 360°', 'Renovación automática', 'Reporte de visualizaciones', 'Posición destacada 7 días', 'Generador de cartel con QR'],
+
+  { tier: 'basico-owner', target: 'Dueño Directo', name: 'Básico', price: 49000, billing: 'unico', badge: 'Pago único',
+    bullets: [
+      '1 propiedad activa',
+      'Hasta 5 fotos por inmueble',
+      'Vigencia 30 días (fijo)',
+      'Contacto directo por WhatsApp',
+      'Máxima prioridad en búsqueda',
+      'Soporte básico',
+    ],
+    excluded: ['Destacado (primer plano)', 'Video tour 360°', 'Herramientas de marketing', 'Identidad propia', 'CRM integrado'],
+    cta: 'Publicar por 30 días', highlighted: true },
+
+  { tier: 'starter-agent', target: 'Agente Independiente', name: 'Starter', price: 149000, billing: 'mensual', badge: 'Recurrente',
+    freeBoosts: 3,
+    bullets: [
+      '15 propiedades activas',
+      'Hasta 10 fotos por inmueble',
+      'Contacto directo por WhatsApp',
+      '3 impulsos gratis por mes para destacar propiedades',
+      'Comprá impulsos extra cuando quieras (desde Gs. 13.960 c/u)',
+      'Video tour 360° + link a redes',
+      'Herramientas de marketing (Flyer + QR)',
+      'Soporte técnico especializado',
+    ],
+    excluded: ['Identidad propia en la plataforma', 'CRM integrado con WhatsApp'],
+    cta: 'Quiero Starter' },
+
+  { tier: 'premium-agent', target: 'Inmobiliaria / Top Pro', name: 'Premium', price: 399000, billing: 'mensual', badge: 'Profesional',
+    freeBoosts: 10,
+    bullets: [
+      '50 propiedades activas',
+      'Hasta 15 fotos por inmueble',
+      'Contacto directo por WhatsApp',
+      '10 impulsos gratis por mes para destacar propiedades',
+      'Comprá impulsos extra cuando quieras (desde Gs. 13.960 c/u)',
+      'Video tour 360° + link a redes',
+      'Herramientas de marketing (Flyer + QR)',
+      'Identidad propia en la plataforma',
+      'CRM integrado con WhatsApp',
+      'Soporte prioritario',
+    ],
+    excluded: [],
     cta: 'Quiero Premium', highlighted: true },
-  { tier: 'premium-agent', target: 'Agente', name: 'Premium Agente', price: 249000, badge: 'Profesional',
-    bullets: ['Inmuebles ilimitados', 'Video y tour 360° por propiedad', 'Estadísticas avanzadas', 'Integración WhatsApp Business', 'Identidad propia con logo', 'Creador visual de flyer + QR', 'Gestor multi-propiedad'],
-    cta: 'Quiero Premium Agente' },
 ];
+
+// Agentes inmobiliarios — directorio público con score y trazabilidad
+const AGENTS = [
+  { id: 'AG-001', slug: 'mariana-lopez', name: 'Mariana López', type: 'Independiente', zone: 'Villa Morra, Las Mercedes',
+    avatar: 2, verified: true, joinedYear: 2022, activeProperties: 18, closedRentals: 47, blogPosts: 12, reviews: 38, rating: 4.8,
+    level: 'Top Pro', commissionRate: 5, phone: '+595 981 555 102',
+    bio: 'Especialista en alquileres residenciales en Asunción centro y norte. 4 años conectando inquilinos y propietarios con seriedad y rapidez.' },
+  { id: 'AG-002', slug: 'diego-aguilar', name: 'Diego Aguilar', type: 'Independiente', zone: 'Lambaré, San Lorenzo',
+    avatar: 3, verified: true, joinedYear: 2023, activeProperties: 12, closedRentals: 28, blogPosts: 5, reviews: 21, rating: 4.6,
+    level: 'Pro', commissionRate: 5, phone: '+595 981 555 134',
+    bio: 'Atención personalizada y conocimiento profundo de las zonas sur de Asunción.' },
+  { id: 'AG-003', slug: 'carla-benitez', name: 'Carla Benítez', type: 'Independiente', zone: 'Asunción centro',
+    avatar: 4, verified: true, joinedYear: 2024, activeProperties: 8, closedRentals: 11, blogPosts: 2, reviews: 9, rating: 4.4,
+    level: 'Junior', commissionRate: 5, phone: '+595 982 555 220',
+    bio: 'Joven agente con enfoque digital. Respondo rápido por WhatsApp.' },
+  { id: 'AG-004', slug: 'inmobiliaria-centro', name: 'Inmobiliaria Centro', type: 'Inmobiliaria', zone: 'Asunción, Ñemby, Luque',
+    avatar: 1, verified: true, joinedYear: 2019, activeProperties: 46, closedRentals: 312, blogPosts: 38, reviews: 187, rating: 4.9,
+    level: 'Top Pro', commissionRate: 4, phone: '+595 982 555 408',
+    bio: 'Inmobiliaria con 7 años en el mercado. Equipo de 8 agentes y soporte legal incluido.' },
+  { id: 'AG-005', slug: 'andres-vera', name: 'Andrés Vera', type: 'Independiente', zone: 'Capiatá, San Lorenzo',
+    avatar: 5, verified: false, joinedYear: 2025, activeProperties: 4, closedRentals: 3, blogPosts: 0, reviews: 2, rating: 4.2,
+    level: 'Junior', commissionRate: 5, phone: '+595 983 555 511',
+    bio: 'Nuevo en la plataforma. Disponibilidad full-time.' },
+  { id: 'AG-006', slug: 'inmobiliaria-premium', name: 'Inmobiliaria Premium', type: 'Inmobiliaria', zone: 'Villa Morra, Carmelitas',
+    avatar: 0, verified: true, joinedYear: 2017, activeProperties: 38, closedRentals: 245, blogPosts: 22, reviews: 142, rating: 4.7,
+    level: 'Top Pro', commissionRate: 4, phone: '+595 985 555 199',
+    bio: 'Especialistas en propiedades premium y temporales para ejecutivos.' },
+];
+
+// Captaciones — propiedades captadas por agentes (mock)
+const CAPTURES = [
+  { propertyId: 'AY-01241', agentId: 'AG-001', date: '12/03/2026', status: 'gestionando', owner: 'Roberto S.' },
+  { propertyId: 'AY-01243', agentId: 'AG-001', date: '02/04/2026', status: 'gestionando', owner: 'Patricia M.' },
+  { propertyId: 'AY-01246', agentId: 'AG-001', date: '18/04/2026', status: 'cerrada', owner: 'Hugo G.', rentPrice: 3200000, commission: 160000, paid: true },
+  { propertyId: 'AY-01250', agentId: 'AG-001', date: '05/05/2026', status: 'cerrada', owner: 'Lucía F.', rentPrice: 2800000, commission: 140000, paid: false },
+  { propertyId: 'AY-01252', agentId: 'AG-001', date: '14/05/2026', status: 'gestionando', owner: 'Marcelo V.' },
+];
+
+// Referidos — link único por usuario, comisión por suscripción de referidos
+const REFERRAL_TIERS = [
+  { id: 'standard',   name: 'Estándar',     pct: 10, desc: 'Todos los usuarios. Comisión sobre el primer pago del referido.' },
+  { id: 'influencer', name: 'Influencer',   pct: 25, desc: 'Por invitación. Comisión recurrente durante 6 meses + dashboard avanzado.' },
+];
+
+const REFERRALS = [
+  { id: 'R-001', name: 'Pablo R.',   joined: '03/05/2026', source: 'IG @marianalopez_rl', plan: 'Starter Agente', amount: 149000, commission: 14900,  status: 'pagada' },
+  { id: 'R-002', name: 'Sofía G.',   joined: '08/05/2026', source: 'WhatsApp link',         plan: 'Premium',        amount: 399000, commission: 39900,  status: 'pagada' },
+  { id: 'R-003', name: 'Lucía M.',   joined: '14/05/2026', source: 'Instagram bio',         plan: 'Básico Dueño',   amount: 49000,  commission: 4900,   status: 'pagada' },
+  { id: 'R-004', name: 'Damián V.',  joined: '19/05/2026', source: 'IG @marianalopez_rl', plan: 'Starter Agente', amount: 149000, commission: 14900,  status: 'pendiente' },
+  { id: 'R-005', name: 'Roberto S.', joined: '22/05/2026', source: 'TikTok',                plan: 'Premium',        amount: 399000, commission: 39900,  status: 'pendiente' },
+];
+
+// Impulsos (boosts) — destacar propiedades adicionales tipo Mercado Libre
+const IMPULSE_PACKS = [
+  { id: 'pack-1',  qty: 1,  price: 25000,  unit: 25000, label: 'Impulso suelto' },
+  { id: 'pack-5',  qty: 5,  price: 99000,  unit: 19800, label: 'Pack 5', save: '21%', popular: true },
+  { id: 'pack-10', qty: 10, price: 169000, unit: 16900, label: 'Pack 10', save: '32%' },
+  { id: 'pack-25', qty: 25, price: 349000, unit: 13960, label: 'Pack 25', save: '44%', best: true },
+];
+// Cada impulso destaca 1 propiedad por 7 días en home y catálogo
 
 const ADS = [
   { brand: 'Ferretería Don Mario', tag: 'Ferretería', color: '#f5e6b6', tint: '#8a5e00', desc: 'Todo para tu mudanza con 15% off' },
@@ -142,4 +336,4 @@ const QR_POSTERS = Array.from({ length: 30 }, (_, i) => {
   };
 });
 
-Object.assign(window, { DEPARTAMENTOS, CIUDADES, BARRIOS, TIPOS, PROPERTIES, PLANS, ADS, QR_POSTERS, photo });
+Object.assign(window, { DEPARTAMENTOS, CIUDADES, BARRIOS, BARRIOS_BY_CIUDAD, TIPOS, PROPERTIES, PLANS, IMPULSE_PACKS, AGENTS, CAPTURES, REFERRAL_TIERS, REFERRALS, ADS, QR_POSTERS, photo });

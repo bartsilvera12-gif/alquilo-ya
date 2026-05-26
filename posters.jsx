@@ -17,69 +17,75 @@ function PostersPage({ route, onNav }) {
         <button className="btn btn-primary btn-sm"><I.print s={14}/> Imprimir seleccionados</button>
       }
     >
-      <div className="card-soft" style={{ padding: 18, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+      <div className="card-soft" style={{ padding: 14, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
         <MiniStat label="Inmuebles con QR" value={PROPERTIES.length} icon="qr" color="var(--blue)"/>
         <MiniStat label="Carteles descargados" value="42" icon="download" color="var(--green)"/>
         <MiniStat label="Escaneos esta semana" value="318" icon="eye" color="var(--yellow-600)"/>
         <MiniStat label="Más escaneado" value="AY-01243" icon="trend" color="#6e3ad1"/>
       </div>
 
-      <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: 20 }}>
-        <div className="row between" style={{ padding: '16px 22px', borderBottom: '1px solid var(--line)' }}>
+      <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: 16 }}>
+        <div className="row between" style={{ padding: '12px 18px', borderBottom: '1px solid var(--line)', alignItems: 'center' }}>
           <div>
-            <div style={{ fontFamily: 'Montserrat', fontWeight: 800, fontSize: 17 }}>Mis inmuebles publicados</div>
-            <div className="muted xs" style={{ marginTop: 2 }}>Cada uno con su QR generado automáticamente</div>
+            <div style={{ fontFamily: 'Montserrat', fontWeight: 800, fontSize: 14 }}>Mis inmuebles publicados</div>
+            <div className="muted" style={{ marginTop: 2, fontSize: 11 }}>Cada uno con su QR generado automáticamente</div>
           </div>
-          <input className="input" placeholder="Buscar por ID o título..." style={{ width: 280, padding: '8px 12px', fontSize: 13 }}/>
+          <input className="input" placeholder="Buscar por ID o título..." style={{ width: 240, padding: '6px 10px', fontSize: 12.5 }}/>
         </div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: 'var(--bg-2)', textAlign: 'left' }}>
-              <th style={th}>Inmueble</th>
-              <th style={th}>QR</th>
-              <th style={th}>Escaneos</th>
-              <th style={th}></th>
+              <th style={{ padding: '8px 14px', fontSize: 10.5, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '.04em', textTransform: 'uppercase' }}>Inmueble</th>
+              <th style={{ padding: '8px 10px', fontSize: 10.5, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '.04em', textTransform: 'uppercase' }}>QR</th>
+              <th style={{ padding: '8px 10px', fontSize: 10.5, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '.04em', textTransform: 'uppercase' }}>Escaneos</th>
+              <th style={{ padding: '8px 14px' }}></th>
             </tr>
           </thead>
           <tbody>
             {list.slice(0, 10).map((p) => (
-              <tr key={p.id} style={{ borderTop: '1px solid var(--line-2)' }}>
-                <td style={td}>
-                  <div className="row gap-16">
-                    <Photo src={p.cover} style={{ width: 64, height: 52, borderRadius: 8, flexShrink: 0 }}/>
+              <tr key={p.id} style={{ borderTop: '1px solid var(--line-2)', transition: 'background .12s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'}
+                onMouseLeave={e => e.currentTarget.style.background = ''}>
+                <td style={{ padding: '10px 14px' }}>
+                  <div className="row gap-10">
+                    <Photo src={p.cover} style={{ width: 44, height: 36, borderRadius: 6, flexShrink: 0 }}/>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>{p.title}</div>
-                      <div className="muted xs"><span className="mono" style={{ fontWeight: 600 }}>{p.id}</span> · {p.address}</div>
+                      <div style={{ fontWeight: 600, fontSize: 12.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 280 }}>{p.title}</div>
+                      <div style={{ marginTop: 2, fontSize: 11, color: 'var(--ink-3)' }}>
+                        <span className="mono" style={{ fontWeight: 600, fontSize: 10.5 }}>{p.id}</span> · {p.address}
+                      </div>
                     </div>
                   </div>
                 </td>
-                <td style={td}>
-                  <div style={{ padding: 4, background: '#fff', border: '1px solid var(--line)', borderRadius: 6, display: 'inline-block' }}>
-                    <QRMock size={36} id={p.id}/>
+                <td style={{ padding: '10px 10px' }}>
+                  <div style={{ padding: 3, background: '#fff', border: '1px solid var(--line)', borderRadius: 5, display: 'inline-block' }}>
+                    <QRMock size={28} id={p.id}/>
                   </div>
                 </td>
-                <td style={td}>
-                  <div style={{ fontWeight: 700 }}>{42 + (p.id.charCodeAt(5) * 13) % 380}</div>
-                  <div className="muted xs">últimos 7 días</div>
+                <td style={{ padding: '10px 10px' }}>
+                  <div style={{ fontWeight: 700, fontSize: 13 }}>{42 + (p.id.charCodeAt(5) * 13) % 380}</div>
+                  <div className="muted" style={{ fontSize: 10.5 }}>últimos 7 días</div>
                 </td>
-                <td style={{ ...td, textAlign: 'right' }}>
-                  <div className="row gap-6" style={{ justifyContent: 'flex-end' }}>
-                    <button className="btn btn-outline btn-sm" style={{ padding: '6px 10px' }} title="Descargar"><I.download s={12}/></button>
-                    <button className="btn btn-outline btn-sm" style={{ padding: '6px 10px' }} title="Imprimir"><I.print s={12}/></button>
-                    <button className="btn btn-blue btn-sm" onClick={() => setModalId(p.id)}>Ver cartel <I.chev s={12}/></button>
+                <td style={{ padding: '10px 14px', textAlign: 'right' }}>
+                  <div className="row gap-4" style={{ justifyContent: 'flex-end' }}>
+                    <button title="Descargar" style={{ padding: '5px', width: 26, height: 26, borderRadius: 7, background: 'transparent', color: 'var(--ink-3)', border: '1px solid var(--line)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><I.download s={11}/></button>
+                    <button title="Imprimir" style={{ padding: '5px', width: 26, height: 26, borderRadius: 7, background: 'transparent', color: 'var(--ink-3)', border: '1px solid var(--line)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><I.print s={11}/></button>
+                    <button onClick={() => setModalId(p.id)} style={{ padding: '5px 10px', height: 26, borderRadius: 7, background: 'var(--blue)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11.5, fontWeight: 600, fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      Ver <I.chev s={10}/>
+                    </button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="row between" style={{ padding: '14px 22px', borderTop: '1px solid var(--line)', fontSize: 13, color: 'var(--ink-3)' }}>
+        <div className="row between" style={{ padding: '10px 18px', borderTop: '1px solid var(--line)', fontSize: 12, color: 'var(--ink-3)' }}>
           <div>Mostrando 10 de {PROPERTIES.length} inmuebles</div>
           <div className="row gap-4">
-            <button className="btn btn-outline btn-sm">‹</button>
-            <span className="pill" style={{ padding: '6px 10px' }}>1</span>
-            <button className="btn btn-outline btn-sm">2</button>
-            <button className="btn btn-outline btn-sm">›</button>
+            <button style={{ padding: '4px 9px', borderRadius: 6, background: '#fff', border: '1px solid var(--line)', cursor: 'pointer', fontSize: 12 }}>‹</button>
+            <span style={{ padding: '4px 10px', borderRadius: 6, background: 'var(--ink)', color: '#fff', fontSize: 12, fontWeight: 600 }}>1</span>
+            <button style={{ padding: '4px 9px', borderRadius: 6, background: '#fff', border: '1px solid var(--line)', cursor: 'pointer', fontSize: 12 }}>2</button>
+            <button style={{ padding: '4px 9px', borderRadius: 6, background: '#fff', border: '1px solid var(--line)', cursor: 'pointer', fontSize: 12 }}>›</button>
           </div>
         </div>
       </div>
